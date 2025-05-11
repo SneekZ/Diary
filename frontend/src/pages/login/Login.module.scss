@@ -1,0 +1,15 @@
+@use "./../../styles/global.scss";
+
+.center_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  border-radius: global.$border-radius;
+  border: global.$border;
+  padding: 8px;
+  color: white;
+}
