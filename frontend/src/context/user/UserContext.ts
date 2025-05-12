@@ -8,7 +8,11 @@ import {
 interface UserContextProps {
   loggedIn: boolean;
   user: UserModel;
-  login: (user: UserLogin, callback: () => void) => void;
+  login: (
+    user: UserLogin,
+    positiveCallback: () => void,
+    callback: () => void
+  ) => void;
   patchUser: (user: UserModel, callback: () => void) => void;
   logout: (callback: () => void) => void;
 }

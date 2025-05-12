@@ -15,7 +15,11 @@ const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [api, contextHolder] = notification.useNotification();
 
   const login = useCallback(
-    async (user: UserLogin, callback: () => void) => {
+    async (
+      user: UserLogin,
+      positiveCallback: () => void,
+      callback: () => void
+    ) => {
       httpClient
         .post("/login/", {
           ...user,
@@ -23,13 +27,15 @@ const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         .then((response) => {
           setLoggingIn(true);
           setUser(response.data as unknown as UserModel);
-          console.log(response.data as unknown as UserModel);
+          positiveCallback();
         })
         .catch((e) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });
@@ -52,7 +58,9 @@ const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });
@@ -74,7 +82,9 @@ const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });

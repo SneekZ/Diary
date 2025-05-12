@@ -7,20 +7,33 @@ import { notification } from "antd";
 const NoteContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [api, contextHolder] = notification.useNotification();
 
-  const [notes, setNotes] = useState<NoteModel[]>([]);
+  const [notes, setNotes] = useState<Map<number, NoteModel>>(
+    new Map<number, NoteModel>()
+  );
 
   const refreshNotes = useCallback(
     async (callback: () => void) => {
       httpClient
         .get("/note/")
         .then((response) => {
-          setNotes(response.data as unknown as NoteModel[]);
+          const noteList = response.data as unknown as NoteModel[];
+          const noteMap = new Map<number, NoteModel>();
+          noteList.map((value) =>
+            noteMap.set(value.id, {
+              ...value,
+              dateStart: new Date(value.dateStart),
+              dateEnd: new Date(value.dateEnd),
+            })
+          );
+          setNotes(noteMap);
         })
         .catch((e) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });
@@ -31,53 +44,77 @@ const NoteContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   );
 
   const addNote = useCallback(
-    async (note: NoteModel, callback: () => void) => {
+    async (
+      note: NoteModel,
+      positiveCallback: () => void,
+      callback: () => void
+    ) => {
       httpClient
         .post("/note/", {
           ...note,
         })
-        .then(() => {
-          setNotes((prev) => {
-            return [...prev, note];
+        .then((response) => {
+          const note = response.data as unknown as NoteModel;
+          const noteMap = new Map<number, NoteModel>(notes);
+          noteMap.set(note.id, {
+            ...note,
+            dateStart: new Date(note.dateStart),
+            dateEnd: new Date(note.dateEnd),
           });
+          setNotes(noteMap);
+          positiveCallback();
         })
         .catch((e) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });
         })
         .finally(callback);
     },
-    [api]
+    [api, notes]
   );
 
   const patchNote = useCallback(
-    async (note: NoteModel, callback: () => void) => {
+    async (
+      note: NoteModel,
+      positiveCallback: () => void,
+      callback: () => void
+    ) => {
       httpClient
         .patch("/note/", {
           ...note,
         })
         .then((response) => {
-          setNotes((prev) => {
-            return [...prev, response.data as unknown as NoteModel];
+          const note = response.data as unknown as NoteModel;
+          const noteMap = new Map<number, NoteModel>(notes);
+          noteMap.set(note.id, {
+            ...note,
+            dateStart: new Date(note.dateStart),
+            dateEnd: new Date(note.dateEnd),
           });
+          setNotes(noteMap);
+          positiveCallback();
         })
         .catch((e) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });
         })
         .finally(callback);
     },
-    [api]
+    [api, notes]
   );
 
   const deleteNote = useCallback(
@@ -85,20 +122,24 @@ const NoteContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
       httpClient
         .delete(`/note/${note.id}`)
         .then(() => {
-          setNotes((prev) => prev.filter((value) => value.id !== note.id));
+          const noteMap = new Map<number, NoteModel>(notes);
+          noteMap.delete(note.id);
+          setNotes(noteMap);
         })
         .catch((e) => {
           api.open({
             message: "Error",
             description:
-              e.response?.data?.detail || "Возникла неизвестная ошибка",
+              typeof e.response?.data?.detail === "object"
+                ? JSON.stringify(e.response.data.detail)
+                : e.response?.data?.detail || "Возникла неизвестная ошибка",
             showProgress: true,
             pauseOnHover: true,
           });
         })
         .finally(callback);
     },
-    [api]
+    [api, notes]
   );
 
   return (
