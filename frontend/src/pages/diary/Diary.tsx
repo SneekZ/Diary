@@ -137,8 +137,8 @@ const NoteComponent: FC<{ note: NoteModel }> = ({ note }) => {
         style={{ backgroundColor: `#${note.color}` }}
         onClick={() => setModalOpen(true)}
       >
-        <div style={{ fontSize: "20px" }}>{shortText(note.text)}</div>
-        <div>
+        <div className={styles["note__text"]}>{shortText(note.text)}</div>
+        <div className={styles["note__time"]}>
           {normalizeTime(note.dateStart)} - {normalizeTime(note.dateEnd)}
         </div>
       </div>
