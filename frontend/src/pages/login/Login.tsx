@@ -51,9 +51,6 @@ const LoginPage: FC = () => {
             }}
             loading={loading}
             disabled={!validInput}
-            style={{
-              color: "white",
-            }}
           >
             Войти
           </Button>

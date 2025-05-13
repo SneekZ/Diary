@@ -118,9 +118,6 @@ const RegisterPage: FC = () => {
             }}
             loading={loading}
             disabled={!validInput}
-            style={{
-              color: "white",
-            }}
           >
             Создать аккаунт
           </Button>
